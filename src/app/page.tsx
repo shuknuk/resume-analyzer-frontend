@@ -30,8 +30,7 @@ export default function HomePage() {
       const data = await response.json();
       setAnalysisResult(data.analysis);
 
-    } catch (e) { // The fix is here! We removed ': any'.
-      // Now we check the type of 'e' before using it.
+    } catch (e) {
       if (e instanceof Error) {
         setError('Failed to get analysis. Please try again. ' + e.message);
       } else {
@@ -65,7 +64,7 @@ export default function HomePage() {
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
             placeholder="Paste the full text of your resume here..."
             value={resumeText}
-            onChange={(e) => setResumeText(e.raw_value)}
+            onChange={(e) => setResumeText(e.target.value)} // <-- THE FIX IS HERE
           />
           <button
             onClick={handleSubmit}
