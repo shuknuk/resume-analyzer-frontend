@@ -1,8 +1,7 @@
-
-"use client";
+// src/app/page.tsx
+'use client';
 
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
@@ -21,13 +20,18 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
 const ResumeAnalyzer = () => {
   const [resumeText, setResumeText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState(null);
+  const [analysis, setAnalysis] = useState<{
+    score: number;
+    summary: string;
+    keywords: string[];
+    strengths: string[];
+    improvements: string[];
+  } | null>(null);
 
   const handleAnalyze = async () => {
     if (!resumeText.trim()) {
@@ -40,7 +44,7 @@ const ResumeAnalyzer = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      const response = await fetch(`${apiUrl}/analyze`, { // Use the dynamic URL
+      const response = await fetch(`${apiUrl}/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
