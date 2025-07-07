@@ -7,13 +7,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
   CheckCircle,
-  XCircle,
   AlertTriangle,
   Zap,
-  Clipboard,
-  Download,
-  Star,
-  ChevronDown,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
