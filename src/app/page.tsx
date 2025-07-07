@@ -9,38 +9,42 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    setAnalysisResult('');
-    setError('');
+const handleSubmit = async () => {
+  setIsLoading(true);
+  setAnalysisResult('');
+  setError('');
 
-    try {
-      const response = await fetch('http://localhost:8000/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ resume_text: resumeText }),
-      });
+  // Use an environment variable for the API URL
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+  try {
+    const response = await fetch(`${apiUrl}/analyze`, { // Use the dynamic URL
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ resume_text: resumeText }),
+    });
 
-      const data = await response.json();
-      setAnalysisResult(data.analysis);
-
-    } catch (e) {
-      if (e instanceof Error) {
-        setError('Failed to get analysis. Please try again. ' + e.message);
-      } else {
-        setError('An unknown error occurred.');
-      }
-      console.error(e);
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+    setAnalysisResult(data.analysis);
+
+  } catch (e) {
+    if (e instanceof Error) {
+      setError('Failed to get analysis. Please try again. ' + e.message);
+    } else {
+      setError('An unknown error occurred.');
+    }
+    console.error(e);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <main className="flex flex-col items-center min-h-screen bg-gray-50 p-4 sm:p-8">
