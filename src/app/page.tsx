@@ -10,7 +10,6 @@ export default function HomePage() {
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
-    // Reset state and start loading
     setIsLoading(true);
     setAnalysisResult('');
     setError('');
@@ -31,11 +30,15 @@ export default function HomePage() {
       const data = await response.json();
       setAnalysisResult(data.analysis);
 
-    } catch (e: any) {
-      setError('Failed to get analysis. Please try again. ' + e.message);
+    } catch (e) { // The fix is here! We removed ': any'.
+      // Now we check the type of 'e' before using it.
+      if (e instanceof Error) {
+        setError('Failed to get analysis. Please try again. ' + e.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
       console.error(e);
     } finally {
-      // Stop loading regardless of success or error
       setIsLoading(false);
     }
   };
@@ -62,7 +65,7 @@ export default function HomePage() {
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
             placeholder="Paste the full text of your resume here..."
             value={resumeText}
-            onChange={(e) => setResumeText(e.target.value)}
+            onChange={(e) => setResumeText(e.raw_value)}
           />
           <button
             onClick={handleSubmit}
@@ -73,7 +76,6 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Error Display */}
         {error && (
             <div className="mt-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
                 <strong className="font-bold">Error: </strong>
@@ -81,7 +83,6 @@ export default function HomePage() {
             </div>
         )}
 
-        {/* Results Section */}
         {analysisResult && (
           <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
