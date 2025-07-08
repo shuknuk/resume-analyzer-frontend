@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import Link from 'next/link'; 
 import { toast } from 'react-toastify';
 import {
   CheckCircle,
@@ -82,10 +83,10 @@ export default function ResumeAnalyzerPage() {
         <div className="hidden border-r bg-muted/40 lg:block">
           <div className="flex h-full max-h-screen flex-col gap-2">
             <div className="flex h-[60px] items-center border-b px-6">
-              <a href="/" className="flex items-center gap-2 font-semibold">
+              <Link href="/" className="flex items-center gap-2 font-semibold">
                 <FileText className="h-6 w-6" />
                 <span>Resume Analyzer</span>
-              </a>
+              </Link>
             </div>
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid items-start px-4 text-sm font-medium">
