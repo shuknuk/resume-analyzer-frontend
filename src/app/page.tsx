@@ -1,7 +1,8 @@
+// src/app/page.tsx
 'use client';
 
 import { useState } from "react";
-import Link from 'next/link'; 
+import Link from 'next/link';
 import { toast } from 'react-toastify';
 import {
   CheckCircle,
@@ -35,6 +36,7 @@ type Analysis = {
 
 export default function ResumeAnalyzerPage() {
   const [resumeText, setResumeText] = useState("");
+  const [jobDescription, setJobDescription] = useState(""); // <-- ADD THIS
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
 
@@ -53,7 +55,11 @@ export default function ResumeAnalyzerPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ resume_text: resumeText }),
+        // --- UPDATE THIS PART ---
+        body: JSON.stringify({
+          resume_text: resumeText,
+          job_description: jobDescription,
+        }),
       });
 
       if (!response.ok) {
@@ -90,14 +96,26 @@ export default function ResumeAnalyzerPage() {
             </div>
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid items-start px-4 text-sm font-medium">
-                <div className="p-2">
-                  <h3 className="mb-2 font-semibold">Your Resume</h3>
-                  <Textarea
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    placeholder="Paste your resume text here..."
-                    className="h-64 text-sm"
-                  />
+                {/* --- UPDATE THIS SECTION --- */}
+                <div className="p-2 space-y-4">
+                  <div>
+                    <h3 className="mb-2 font-semibold">Your Resume</h3>
+                    <Textarea
+                      value={resumeText}
+                      onChange={(e) => setResumeText(e.target.value)}
+                      placeholder="Paste your resume text here..."
+                      className="h-64 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="mb-2 font-semibold">Job Description (Optional)</h3>
+                    <Textarea
+                      value={jobDescription}
+                      onChange={(e) => setJobDescription(e.target.value)}
+                      placeholder="Paste job description for tailored feedback..."
+                      className="h-40 text-sm"
+                    />
+                  </div>
                 </div>
                 <Button
                   onClick={handleAnalyze}
@@ -131,6 +149,7 @@ export default function ResumeAnalyzerPage() {
           </header>
 
           <main className="flex-1 p-4 md:p-6">
+            {/* ... The rest of your main content is perfect and doesn't need to change ... */}
             {!analysis && !loading && (
               <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[80vh]">
                 <div className="flex flex-col items-center gap-1 text-center">
