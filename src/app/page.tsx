@@ -11,6 +11,7 @@ import {
   Loader2,
   FileText,
   Sparkles,
+  Building2, // New Icon
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -22,10 +23,10 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input"; // New Component
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
-// Define the structure of the analysis object for TypeScript
 type Analysis = {
   score: number;
   summary: string;
@@ -36,7 +37,8 @@ type Analysis = {
 
 export default function ResumeAnalyzerPage() {
   const [resumeText, setResumeText] = useState("");
-  const [jobDescription, setJobDescription] = useState(""); // <-- ADD THIS
+  const [jobDescription, setJobDescription] = useState("");
+  const [companyName, setCompanyName] = useState(""); // New state for Company Name
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
 
@@ -55,10 +57,10 @@ export default function ResumeAnalyzerPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        // --- UPDATE THIS PART ---
         body: JSON.stringify({
           resume_text: resumeText,
           job_description: jobDescription,
+          company_name: companyName, // Sending the new data
         }),
       });
 
@@ -96,7 +98,6 @@ export default function ResumeAnalyzerPage() {
             </div>
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid items-start px-4 text-sm font-medium">
-                {/* --- UPDATE THIS SECTION --- */}
                 <div className="p-2 space-y-4">
                   <div>
                     <h3 className="mb-2 font-semibold">Your Resume</h3>
@@ -112,9 +113,23 @@ export default function ResumeAnalyzerPage() {
                     <Textarea
                       value={jobDescription}
                       onChange={(e) => setJobDescription(e.target.value)}
-                      placeholder="Paste job description for tailored feedback..."
+                      placeholder="Paste job description..."
                       className="h-40 text-sm"
                     />
+                  </div>
+                  {/* New Company Name Input */}
+                  <div>
+                    <h3 className="mb-2 font-semibold">Company Name (Optional)</h3>
+                    <div className="relative">
+                      <Building2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="e.g. 'Google' or 'TechCorp Inc.'"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        className="pl-8"
+                      />
+                    </div>
                   </div>
                 </div>
                 <Button
@@ -149,7 +164,7 @@ export default function ResumeAnalyzerPage() {
           </header>
 
           <main className="flex-1 p-4 md:p-6">
-            {/* ... The rest of your main content is perfect and doesn't need to change ... */}
+            {/* The main content area stays the same */}
             {!analysis && !loading && (
               <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[80vh]">
                 <div className="flex flex-col items-center gap-1 text-center">
@@ -176,6 +191,7 @@ export default function ResumeAnalyzerPage() {
 
             {analysis && (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {/* The analysis display cards stay the same */}
                 <Card className="md:col-span-2 lg:col-span-3">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
