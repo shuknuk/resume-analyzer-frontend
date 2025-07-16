@@ -11,9 +11,9 @@ import {
   Loader2,
   FileText,
   Sparkles,
-  HelpCircle, // New Icon
-  Download,   // New Icon
-  Trash2,     // New Icon
+  HelpCircle,
+  Download,
+  Trash2,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -147,7 +147,7 @@ export default function ResumeAnalyzerPage() {
           <DialogHeader>
             <DialogTitle>How It Works</DialogTitle>
             <DialogDescription>
-              Welcome! Here&apos;s a quick guide to using the AI Resume Analyzer.
+              Welcome! This is a quick guide to using the AI Resume Analyzer.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 text-sm">
@@ -163,7 +163,7 @@ export default function ResumeAnalyzerPage() {
             <hr className="my-2" />
             <h4 className="font-semibold">Your Privacy</h4>
             <p className="text-xs text-muted-foreground">
-              Your resume text and analysis results are saved **only** in your browser&apos;s local storage. This data is never sent to our servers or viewed by anyone. You are in full control.
+              Your resume text and analysis results are saved only in your browser local storage. This data is never sent to our servers or viewed by anyone. You are in full control.
             </p>
           </div>
           <DialogFooter>
