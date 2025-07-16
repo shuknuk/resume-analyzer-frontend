@@ -240,11 +240,9 @@ export default function ResumeAnalyzerPage() {
             <div className="flex-1">
               <h1 className="text-lg font-semibold">Analysis Dashboard</h1>
             </div>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon" className="h-8 w-8">
-                <HelpCircle className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setIsHelpOpen(true)}>
+              <HelpCircle className="h-4 w-4" />
+            </Button>
             <ThemeToggle />
           </header>
 
