@@ -134,7 +134,7 @@ export default function ResumeAnalyzerPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>How It Works</DialogTitle>
             <DialogDescription>
@@ -142,9 +142,23 @@ export default function ResumeAnalyzerPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 text-sm">
-            <p><strong>1. Paste Your Resume:</strong> Add your resume text.</p>
-            <p><strong>2. Add Context (Optional):</strong> For tailored feedback, add a job description and company name.</p>
-            <p><strong>3. Get Analysis:</strong> Click the &quot;Analyze Resume&quot; button for a detailed breakdown.</p>
+            <div className="space-y-2">
+                <h4 className="font-semibold">1. Paste Your Resume</h4>
+                <p className="text-muted-foreground">Add the full text of your resume into the main text area to get started.</p>
+            </div>
+            <div className="space-y-2">
+                <h4 className="font-semibold">2. Add Context (Optional, but Recommended)</h4>
+                <p className="text-muted-foreground">
+                    - <strong>Job Description:</strong> Paste the description of the job you&apos;re targeting. The AI will analyze your resume against these specific requirements.
+                </p>
+                <p className="text-muted-foreground">
+                    - <strong>Company Name:</strong> Provide a company name. The AI agent will research the company&apos;s values and culture to give you an extra edge.
+                </p>
+            </div>
+             <div className="space-y-2">
+                <h4 className="font-semibold">3. Get Analysis</h4>
+                <p className="text-muted-foreground">Click the &quot;Analyze Resume&quot; button to receive your detailed, AI-powered breakdown.</p>
+            </div>
             <hr className="my-2" />
             <h4 className="font-semibold">Your Privacy</h4>
             <p className="text-xs text-muted-foreground">
