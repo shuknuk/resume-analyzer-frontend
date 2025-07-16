@@ -155,7 +155,7 @@ export default function ResumeAnalyzerPage() {
               <strong>1. Paste Your Resume:</strong> Add the text from your resume into the main text area in the sidebar.
             </p>
             <p>
-              <strong>2. Get Analysis:</strong> Click the "Analyze Resume" button. Our AI will read your resume and provide a detailed breakdown.
+              <strong>2. Get Analysis:</strong> Click the &quot;Analyze Resume&quot; button. Our AI will read your resume and provide a detailed breakdown.
             </p>
             <p>
               <strong>3. Review Feedback:</strong> Your results will appear on the dashboard, including an overall score, keywords, strengths, and areas for improvement.
