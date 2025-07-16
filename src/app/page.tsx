@@ -14,6 +14,7 @@ import {
   HelpCircle,
   Download,
   Trash2,
+  Building2, // Icon for Company
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
@@ -49,18 +51,18 @@ type Analysis = {
 
 export default function ResumeAnalyzerPage() {
   const [resumeText, setResumeText] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [analysisHistory, setAnalysisHistory] = useState<Analysis[]>([]);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
-  // On initial load, check for history and show help modal for first-time visitors
   useEffect(() => {
     const storedHistory = localStorage.getItem('analysisHistory');
     if (storedHistory) {
       setAnalysisHistory(JSON.parse(storedHistory));
     }
-
     const hasVisited = localStorage.getItem('hasVisited');
     if (!hasVisited) {
       setIsHelpOpen(true);
@@ -80,37 +82,28 @@ export default function ResumeAnalyzerPage() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/analyze`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ resume_text: resumeText }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resume_text: resumeText,
+          job_description: jobDescription,
+          company_name: companyName,
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
       const data = await response.json();
-      const newAnalysis: Analysis = {
-        ...data.analysis,
-        timestamp: new Date().toISOString(),
-      };
+      const newAnalysis: Analysis = { ...data.analysis, timestamp: new Date().toISOString() };
       
       setAnalysis(newAnalysis);
-      
-      // Save to history
       const updatedHistory = [newAnalysis, ...analysisHistory];
       setAnalysisHistory(updatedHistory);
       localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
-
       toast.success("Analysis complete!");
 
     } catch (e) {
-      if (e instanceof Error) {
-        toast.error('Failed to get analysis. Please try again.');
-      } else {
-        toast.error('An unknown error occurred.');
-      }
+      if (e instanceof Error) toast.error('Failed to get analysis. Please try again.');
+      else toast.error('An unknown error occurred.');
       console.error(e);
     } finally {
       setLoading(false);
@@ -140,7 +133,6 @@ export default function ResumeAnalyzerPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* --- HELP DIALOG --- */}
       <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -150,31 +142,22 @@ export default function ResumeAnalyzerPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 text-sm">
-            <p>
-              <strong>1. Paste Your Resume:</strong> Add the text from your resume into the main text area in the sidebar.
-            </p>
-            <p>
-              <strong>2. Get Analysis:</strong> Click the &quot;Analyze Resume&quot; button. Our AI will read your resume and provide a detailed breakdown.
-            </p>
-            <p>
-              <strong>3. Review Feedback:</strong> Your results will appear on the dashboard, including an overall score, keywords, strengths, and areas for improvement.
-            </p>
+            <p><strong>1. Paste Your Resume:</strong> Add your resume text.</p>
+            <p><strong>2. Add Context (Optional):</strong> For tailored feedback, add a job description and company name.</p>
+            <p><strong>3. Get Analysis:</strong> Click the &quot;Analyze Resume&quot; button for a detailed breakdown.</p>
             <hr className="my-2" />
             <h4 className="font-semibold">Your Privacy</h4>
             <p className="text-xs text-muted-foreground">
-              Your resume text and analysis results are saved only in your browser local storage. This data is never sent to our servers or viewed by anyone. You are in full control.
+              Your data is saved only in your browser local storage. It is never sent to our servers. You are in full control.
             </p>
           </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button">Got it!</Button>
-            </DialogClose>
+            <DialogClose asChild><Button type="button">Got it!</Button></DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       
       <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
-        {/* --- LEFT SIDEBAR --- */}
         <div className="hidden border-r bg-muted/40 lg:block">
           <div className="flex h-full max-h-screen flex-col gap-2">
             <div className="flex h-[60px] items-center border-b px-6">
@@ -185,91 +168,62 @@ export default function ResumeAnalyzerPage() {
             </div>
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid items-start px-4 text-sm font-medium">
-                <div className="p-2">
-                  <h3 className="mb-2 font-semibold">Your Resume</h3>
-                  <Textarea
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    placeholder="Paste your resume text here..."
-                    className="h-64 text-sm"
-                  />
+                <div className="p-2 space-y-4">
+                  <div>
+                    <h3 className="mb-2 font-semibold">Your Resume</h3>
+                    <Textarea value={resumeText} onChange={(e) => setResumeText(e.target.value)} placeholder="Paste your resume text here..." className="h-48 text-sm" />
+                  </div>
+                  <div>
+                    <h3 className="mb-2 font-semibold">Job Description (Optional)</h3>
+                    <Textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste job description..." className="h-32 text-sm" />
+                  </div>
+                  <div>
+                    <h3 className="mb-2 font-semibold">Company Name (Optional)</h3>
+                    <div className="relative">
+                      <Building2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input type="text" placeholder="e.g. 'Netflix' or 'Stripe'" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="pl-8" />
+                    </div>
+                  </div>
                 </div>
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={loading}
-                  className="m-2"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="mr-2 h-4 w-4" />
-                      Analyze Resume
-                    </>
-                  )}
+                <Button onClick={handleAnalyze} disabled={loading} className="m-2">
+                  {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>) : (<><Zap className="mr-2 h-4 w-4" />Analyze Resume</>)}
                 </Button>
-                
-                {/* --- DATA MANAGEMENT SECTION --- */}
                 <Card className="m-2 mt-4 bg-transparent border-dashed">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-sm">Data Management</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0 grid gap-2">
-                      <Button variant="outline" size="sm" onClick={handleDownloadData} disabled={analysisHistory.length === 0}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Download History
-                      </Button>
-                      <Button variant="destructive" size="sm" onClick={handleClearData} disabled={analysisHistory.length === 0}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Clear History
-                      </Button>
-                    </CardContent>
+                  <CardHeader className="p-4"><CardTitle className="text-sm">Data Management</CardTitle></CardHeader>
+                  <CardContent className="p-4 pt-0 grid gap-2">
+                    <Button variant="outline" size="sm" onClick={handleDownloadData} disabled={analysisHistory.length === 0}><Download className="mr-2 h-4 w-4" />Download History</Button>
+                    <Button variant="destructive" size="sm" onClick={handleClearData} disabled={analysisHistory.length === 0}><Trash2 className="mr-2 h-4 w-4" />Clear History</Button>
+                  </CardContent>
                 </Card>
               </nav>
             </div>
           </div>
         </div>
-
-        {/* --- MAIN CONTENT AREA --- */}
         <div className="flex flex-col">
           <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6">
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold">Analysis Dashboard</h1>
-            </div>
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setIsHelpOpen(true)}>
-              <HelpCircle className="h-4 w-4" />
-            </Button>
+            <div className="flex-1"><h1 className="text-lg font-semibold">Analysis Dashboard</h1></div>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setIsHelpOpen(true)}><HelpCircle className="h-4 w-4" /></Button>
             <ThemeToggle />
           </header>
-
           <main className="flex-1 p-4 md:p-6">
             {!analysis && !loading && (
               <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[80vh]">
                 <div className="flex flex-col items-center gap-1 text-center">
                   <Sparkles className="h-12 w-12 text-muted-foreground" />
-                  <h3 className="text-2xl font-bold tracking-tight">
-                    Ready for your analysis?
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Paste your resume in the sidebar to get started.
-                  </p>
+                  <h3 className="text-2xl font-bold tracking-tight">Ready for your analysis?</h3>
+                  <p className="text-sm text-muted-foreground">Paste your resume in the sidebar to get started.</p>
                 </div>
               </div>
             )}
-            
             {loading && (
-                 <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[80vh]">
-                    <div className="flex flex-col items-center gap-2 text-center">
-                        <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
-                        <h3 className="text-2xl font-bold tracking-tight">Generating Feedback</h3>
-                        <p className="text-sm text-muted-foreground">Our AI is working its magic... this may take a moment.</p>
-                    </div>
-                 </div>
+              <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[80vh]">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
+                  <h3 className="text-2xl font-bold tracking-tight">Generating Feedback</h3>
+                  <p className="text-sm text-muted-foreground">Our AI is working its magic... this may take a moment.</p>
+                </div>
+              </div>
             )}
-
             {analysis && (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <Card className="md:col-span-2 lg:col-span-3">
@@ -278,20 +232,15 @@ export default function ResumeAnalyzerPage() {
                       <CardTitle>Overall Score</CardTitle>
                       <CardDescription>{analysis.summary}</CardDescription>
                     </div>
-                    <div className="text-4xl font-bold text-primary">
-                      {analysis.score}/100
-                    </div>
+                    <div className="text-4xl font-bold text-primary">{analysis.score}/100</div>
                   </CardHeader>
                   <CardContent>
                     <h4 className="font-semibold mb-2">Keywords</h4>
                     <div className="flex flex-wrap gap-2">
-                      {analysis.keywords.map((keyword, i) => (
-                        <Badge key={i} variant="secondary">{keyword}</Badge>
-                      ))}
+                      {analysis.keywords.map((keyword, i) => (<Badge key={i} variant="secondary">{keyword}</Badge>))}
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card className="md:col-span-2 lg:col-span-3">
                   <Tabs defaultValue="strengths" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
@@ -301,24 +250,14 @@ export default function ResumeAnalyzerPage() {
                     <TabsContent value="strengths">
                       <CardContent className="pt-6">
                         <ul className="space-y-4">
-                          {analysis.strengths.map((strength, i) => (
-                            <li key={i} className="flex items-start gap-3">
-                              <CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                              <p className="text-muted-foreground">{strength}</p>
-                            </li>
-                          ))}
+                          {analysis.strengths.map((strength, i) => (<li key={i} className="flex items-start gap-3"><CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" /><p className="text-muted-foreground">{strength}</p></li>))}
                         </ul>
                       </CardContent>
                     </TabsContent>
                     <TabsContent value="improvements">
                       <CardContent className="pt-6">
-                         <ul className="space-y-4">
-                          {analysis.improvements.map((improvement, i) => (
-                            <li key={i} className="flex items-start gap-3">
-                              <AlertTriangle className="h-5 w-5 text-yellow-500 mt-1 flex-shrink-0" />
-                              <p className="text-muted-foreground">{improvement}</p>
-                            </li>
-                          ))}
+                        <ul className="space-y-4">
+                          {analysis.improvements.map((improvement, i) => (<li key={i} className="flex items-start gap-3"><AlertTriangle className="h-5 w-5 text-yellow-500 mt-1 flex-shrink-0" /><p className="text-muted-foreground">{improvement}</p></li>))}
                         </ul>
                       </CardContent>
                     </TabsContent>
