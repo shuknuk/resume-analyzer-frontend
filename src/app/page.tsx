@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { toast } from 'react-toastify';
+import { v4 as uuidv4 } from 'uuid'; // Import UUID generator
 import {
   CheckCircle,
   AlertTriangle,
@@ -14,7 +15,7 @@ import {
   HelpCircle,
   Download,
   Trash2,
-  Building2, // Icon for Company
+  Building2,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -57,22 +58,40 @@ export default function ResumeAnalyzerPage() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [analysisHistory, setAnalysisHistory] = useState<Analysis[]>([]);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null); // State for Session ID
 
+  // On initial load, set up everything
   useEffect(() => {
+    // Load local analysis history
     const storedHistory = localStorage.getItem('analysisHistory');
     if (storedHistory) {
       setAnalysisHistory(JSON.parse(storedHistory));
     }
+
+    // Show help modal for first-time visitors
     const hasVisited = localStorage.getItem('hasVisited');
     if (!hasVisited) {
       setIsHelpOpen(true);
       localStorage.setItem('hasVisited', 'true');
     }
+
+    // Get or create the unique session ID
+    let storedSessionId = localStorage.getItem('sessionId');
+    if (!storedSessionId) {
+      storedSessionId = uuidv4();
+      localStorage.setItem('sessionId', storedSessionId);
+    }
+    setSessionId(storedSessionId);
+
   }, []);
 
   const handleAnalyze = async () => {
     if (!resumeText.trim()) {
       toast.error("Please paste your resume text first.");
+      return;
+    }
+    if (!sessionId) {
+      toast.error("Session not initialized. Please refresh the page.");
       return;
     }
     setLoading(true);
@@ -84,6 +103,7 @@ export default function ResumeAnalyzerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          session_id: sessionId, // Send the session ID to the backend
           resume_text: resumeText,
           job_description: jobDescription,
           company_name: companyName,
@@ -111,24 +131,29 @@ export default function ResumeAnalyzerPage() {
   };
 
   const handleDownloadData = () => {
-    const dataStr = JSON.stringify(analysisHistory, null, 2);
+    const dataStr = JSON.stringify({sessionId, history: analysisHistory}, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'resume-analysis-history.json';
+    link.download = `resume-analysis-session-${sessionId}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast.info("Your analysis history has been downloaded.");
+    toast.info("Your session data has been downloaded.");
   };
 
   const handleClearData = () => {
     localStorage.removeItem('analysisHistory');
+    localStorage.removeItem('sessionId'); // Also clear session ID
     setAnalysisHistory([]);
     setAnalysis(null);
-    toast.warn("Your analysis history has been cleared.");
+    // Generate a new session ID for the next use
+    const newSessionId = uuidv4();
+    localStorage.setItem('sessionId', newSessionId);
+    setSessionId(newSessionId);
+    toast.warn("Your session data has been cleared.");
   };
 
   return (
