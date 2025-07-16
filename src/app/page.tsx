@@ -147,7 +147,7 @@ export default function ResumeAnalyzerPage() {
           <DialogHeader>
             <DialogTitle>How It Works</DialogTitle>
             <DialogDescription>
-              Welcome! Here’s a quick guide to using the AI Resume Analyzer.
+              Welcome! Here&apos;s a quick guide to using the AI Resume Analyzer.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 text-sm">
@@ -163,7 +163,7 @@ export default function ResumeAnalyzerPage() {
             <hr className="my-2" />
             <h4 className="font-semibold">Your Privacy</h4>
             <p className="text-xs text-muted-foreground">
-              Your resume text and analysis results are saved **only** in your browser's local storage. This data is never sent to our servers or viewed by anyone. You are in full control.
+              Your resume text and analysis results are saved **only** in your browser&apos;s local storage. This data is never sent to our servers or viewed by anyone. You are in full control.
             </p>
           </div>
           <DialogFooter>
@@ -249,7 +249,6 @@ export default function ResumeAnalyzerPage() {
           </header>
 
           <main className="flex-1 p-4 md:p-6">
-            {/* ... The rest of your main content area (loading/analysis display) is perfect and doesn't need to change ... */}
             {!analysis && !loading && (
               <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[80vh]">
                 <div className="flex flex-col items-center gap-1 text-center">
@@ -276,7 +275,6 @@ export default function ResumeAnalyzerPage() {
 
             {analysis && (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {/* ... The analysis display cards stay the same ... */}
                 <Card className="md:col-span-2 lg:col-span-3">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
