@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { v4 as uuidv4 } from 'uuid'; // Import UUID generator
+import { v4 as uuidv4 } from 'uuid';
 import {
   CheckCircle,
   AlertTriangle,
@@ -16,8 +16,8 @@ import {
   Download,
   Trash2,
   Building2,
+  Lightbulb,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -30,25 +30,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-// Define the structure of the analysis object for TypeScript
+// Define the NEW structure of the analysis object
+type Improvement = {
+  suggestion: string;
+  explanation: string;
+  example: string;
+};
 type Analysis = {
   score: number;
-  summary: string;
-  keywords: string[];
+  scoreRationale: string;
   strengths: string[];
-  improvements: string[];
-  timestamp: string; // Add timestamp for history
+  improvements: Improvement[];
 };
+
+// This is a separate type for the history to include the timestamp
+type HistoryEntry = Analysis & {
+    timestamp: string;
+};
+
 
 export default function ResumeAnalyzerPage() {
   const [resumeText, setResumeText] = useState("");
@@ -56,42 +58,31 @@ export default function ResumeAnalyzerPage() {
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
-  const [analysisHistory, setAnalysisHistory] = useState<Analysis[]>([]);
+  const [analysisHistory, setAnalysisHistory] = useState<HistoryEntry[]>([]);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null); // State for Session ID
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
-  // On initial load, set up everything
   useEffect(() => {
-    // Load local analysis history
     const storedHistory = localStorage.getItem('analysisHistory');
     if (storedHistory) {
       setAnalysisHistory(JSON.parse(storedHistory));
     }
-
-    // Show help modal for first-time visitors
     const hasVisited = localStorage.getItem('hasVisited');
     if (!hasVisited) {
       setIsHelpOpen(true);
       localStorage.setItem('hasVisited', 'true');
     }
-
-    // Get or create the unique session ID
     let storedSessionId = localStorage.getItem('sessionId');
     if (!storedSessionId) {
       storedSessionId = uuidv4();
       localStorage.setItem('sessionId', storedSessionId);
     }
     setSessionId(storedSessionId);
-
   }, []);
 
   const handleAnalyze = async () => {
     if (!resumeText.trim()) {
       toast.error("Please paste your resume text first.");
-      return;
-    }
-    if (!sessionId) {
-      toast.error("Session not initialized. Please refresh the page.");
       return;
     }
     setLoading(true);
@@ -103,7 +94,7 @@ export default function ResumeAnalyzerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          session_id: sessionId, // Send the session ID to the backend
+          session_id: sessionId,
           resume_text: resumeText,
           job_description: jobDescription,
           company_name: companyName,
@@ -111,14 +102,15 @@ export default function ResumeAnalyzerPage() {
       });
 
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
       const data = await response.json();
-      const newAnalysis: Analysis = { ...data.analysis, timestamp: new Date().toISOString() };
-      
-      setAnalysis(newAnalysis);
-      const updatedHistory = [newAnalysis, ...analysisHistory];
+      setAnalysis(data.analysis);
+
+      // Save to history with a timestamp
+      const newHistoryEntry: HistoryEntry = { ...data.analysis, timestamp: new Date().toISOString() };
+      const updatedHistory = [newHistoryEntry, ...analysisHistory];
       setAnalysisHistory(updatedHistory);
       localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
+      
       toast.success("Analysis complete!");
 
     } catch (e) {
@@ -130,6 +122,12 @@ export default function ResumeAnalyzerPage() {
     }
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 85) return "text-green-400";
+    if (score >= 70) return "text-yellow-400";
+    return "text-red-400";
+  };
+  
   const handleDownloadData = () => {
     const dataStr = JSON.stringify({sessionId, history: analysisHistory}, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
@@ -146,10 +144,9 @@ export default function ResumeAnalyzerPage() {
 
   const handleClearData = () => {
     localStorage.removeItem('analysisHistory');
-    localStorage.removeItem('sessionId'); // Also clear session ID
+    localStorage.removeItem('sessionId');
     setAnalysisHistory([]);
     setAnalysis(null);
-    // Generate a new session ID for the next use
     const newSessionId = uuidv4();
     localStorage.setItem('sessionId', newSessionId);
     setSessionId(newSessionId);
@@ -264,43 +261,55 @@ export default function ResumeAnalyzerPage() {
               </div>
             )}
             {analysis && (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="md:col-span-2 lg:col-span-3">
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle>Overall Score</CardTitle>
-                      <CardDescription>{analysis.summary}</CardDescription>
-                    </div>
-                    <div className="text-4xl font-bold text-primary">{analysis.score}/100</div>
+              <div className="grid gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Analysis Overview</CardTitle>
+                    <CardDescription>{analysis.scoreRationale}</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <h4 className="font-semibold mb-2">Keywords</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {analysis.keywords.map((keyword, i) => (<Badge key={i} variant="secondary">{keyword}</Badge>))}
+                  <CardContent className="flex items-center justify-center p-6">
+                    <div className={`text-6xl font-bold ${getScoreColor(analysis.score)}`}>
+                      {analysis.score}/100
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="md:col-span-2 lg:col-span-3">
-                  <Tabs defaultValue="strengths" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="strengths">Strengths</TabsTrigger>
-                      <TabsTrigger value="improvements">Areas for Improvement</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="strengths">
-                      <CardContent className="pt-6">
-                        <ul className="space-y-4">
-                          {analysis.strengths.map((strength, i) => (<li key={i} className="flex items-start gap-3"><CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" /><p className="text-muted-foreground">{strength}</p></li>))}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Strengths</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className="list-disc pl-5 space-y-2">
+                            {analysis.strengths.map((strength, i) => (
+                                <li key={i}>{strength}</li>
+                            ))}
                         </ul>
-                      </CardContent>
-                    </TabsContent>
-                    <TabsContent value="improvements">
-                      <CardContent className="pt-6">
-                        <ul className="space-y-4">
-                          {analysis.improvements.map((improvement, i) => (<li key={i} className="flex items-start gap-3"><AlertTriangle className="h-5 w-5 text-yellow-500 mt-1 flex-shrink-0" /><p className="text-muted-foreground">{improvement}</p></li>))}
-                        </ul>
-                      </CardContent>
-                    </TabsContent>
-                  </Tabs>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Lightbulb className="text-yellow-500" /> Actionable Improvements</CardTitle>
+                        <CardDescription>Expand each section to see why it matters and how to fix it.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Accordion type="single" collapsible className="w-full">
+                            {analysis.improvements.map((item, i) => (
+                                <AccordionItem value={`item-${i}`} key={i}>
+                                    <AccordionTrigger className="font-semibold">{item.suggestion}</AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="space-y-4">
+                                            <p className="text-muted-foreground"><strong className="text-foreground">Why it matters:</strong> {item.explanation}</p>
+                                            <div>
+                                                <p className="font-semibold">Example:</p>
+                                                <blockquote className="mt-2 border-l-2 pl-6 italic text-sm">
+                                                    {item.example}
+                                                </blockquote>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </CardContent>
                 </Card>
               </div>
             )}
