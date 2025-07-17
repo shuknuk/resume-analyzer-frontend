@@ -29,7 +29,7 @@ To run this project on your local machine, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/shuknuk/resume-analyzer-frontend.git](https://github.com/shuknuk/resume-analyzer-frontend.git)
+    git clone https://github.com/shuknuk/resume-analyzer-frontend.git
     cd resume-analyzer-frontend
     ```
 
