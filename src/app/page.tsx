@@ -1,10 +1,10 @@
 // src/app/page.tsx
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react"; // Removed useEffect
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { v4 as uuidv4 } from 'uuid';
+// Removed uuidv4 import
 import {
   CheckCircle,
   Zap,
@@ -15,7 +15,7 @@ import {
   Download,
   Building2,
   Lightbulb,
-  Terminal, // New Icon for the log
+  Terminal,
 } from "lucide-react";
 import {
   Card,
@@ -50,9 +50,9 @@ export default function ResumeAnalyzerPage() {
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
-  const [agentLog, setAgentLog] = useState<string | null>(null); // State for the agent log
+  const [agentLog, setAgentLog] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [isLogOpen, setIsLogOpen] = useState(false); // State for the log dialog
+  const [isLogOpen, setIsLogOpen] = useState(false);
 
   // Input validation function
   const validateInput = (text: string): boolean => {
@@ -93,7 +93,7 @@ export default function ResumeAnalyzerPage() {
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
       setAnalysis(data.analysis);
-      setAgentLog(data.log); // Save the agent log
+      setAgentLog(data.log);
       toast.success("Analysis complete!");
 
     } catch (e) {
