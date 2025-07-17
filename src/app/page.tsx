@@ -32,7 +32,6 @@ import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define the NEW structure of the analysis object
 type Improvement = {
@@ -150,7 +149,7 @@ export default function ResumeAnalyzerPage() {
     if (score >= 70) return "text-yellow-400";
     return "text-red-400";
   };
-  
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Help Dialog */}
@@ -159,17 +158,17 @@ export default function ResumeAnalyzerPage() {
           <DialogHeader><DialogTitle>How It Works</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-4 text-sm">
             <div className="space-y-2">
-                <h4 className="font-semibold">1. Paste Your Resume</h4>
-                <p className="text-muted-foreground">Add the full text of your resume into the main text area to get started.</p>
+              <h4 className="font-semibold">1. Paste Your Resume</h4>
+              <p className="text-muted-foreground">Add the full text of your resume into the main text area to get started.</p>
             </div>
             <div className="space-y-2">
-                <h4 className="font-semibold">2. Add Context (Optional, but Recommended)</h4>
-                <p className="text-muted-foreground">- <strong>Job Description:</strong> Paste the description of the job you&apos;re targeting. The AI will analyze your resume against these specific requirements.</p>
-                <p className="text-muted-foreground">- <strong>Company Name:</strong> Provide a company name. The AI agent will research the company&apos;s values and culture to give you an extra edge.</p>
+              <h4 className="font-semibold">2. Add Context (Optional, but Recommended)</h4>
+              <p className="text-muted-foreground">- <strong>Job Description:</strong> Paste the description of the job you&apos;re targeting. The AI will analyze your resume against these specific requirements.</p>
+              <p className="text-muted-foreground">- <strong>Company Name:</strong> Provide a company name. The AI agent will research the company&apos;s values and culture to give you an extra edge.</p>
             </div>
-             <div className="space-y-2">
-                <h4 className="font-semibold">3. Get Analysis</h4>
-                <p className="text-muted-foreground">Click the &quot;Analyze Resume&quot; button to receive your detailed, AI-powered breakdown.</p>
+            <div className="space-y-2">
+              <h4 className="font-semibold">3. Get Analysis</h4>
+              <p className="text-muted-foreground">Click the &quot;Analyze Resume&quot; button to receive your detailed, AI-powered breakdown.</p>
             </div>
             <hr className="my-2" />
             <h4 className="font-semibold">Your Privacy & Data</h4>
@@ -189,7 +188,7 @@ export default function ResumeAnalyzerPage() {
           <DialogFooter><DialogClose asChild><Button type="button" className="w-full sm:w-auto">Close</Button></DialogClose></DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
@@ -209,41 +208,41 @@ export default function ResumeAnalyzerPage() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="mb-3 font-semibold">Your Resume</h3>
-                    <Textarea 
-                      value={resumeText} 
-                      onChange={(e) => setResumeText(e.target.value)} 
-                      placeholder="Paste your resume text here..." 
-                      className="h-40 text-sm resize-none" 
+                    <Textarea
+                      value={resumeText}
+                      onChange={(e) => setResumeText(e.target.value)}
+                      placeholder="Paste your resume text here..."
+                      className="h-40 text-sm resize-none"
                     />
                   </div>
                   <div>
                     <h3 className="mb-3 font-semibold">Job Description (Optional)</h3>
-                    <Textarea 
-                      value={jobDescription} 
-                      onChange={(e) => setJobDescription(e.target.value)} 
-                      placeholder="Paste job description..." 
-                      className="h-32 text-sm resize-none" 
+                    <Textarea
+                      value={jobDescription}
+                      onChange={(e) => setJobDescription(e.target.value)}
+                      placeholder="Paste job description..."
+                      className="h-32 text-sm resize-none"
                     />
                   </div>
                   <div>
                     <h3 className="mb-3 font-semibold">Company Name (Optional)</h3>
                     <div className="relative">
                       <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        type="text" 
-                        placeholder="e.g. 'Netflix' or 'Stripe'" 
-                        value={companyName} 
-                        onChange={(e) => setCompanyName(e.target.value)} 
-                        className="pl-10 h-12" 
+                      <Input
+                        type="text"
+                        placeholder="e.g. 'Netflix' or 'Stripe'"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        className="pl-10 h-12"
                       />
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => {
                       handleAnalyze();
                       setIsMobileSidebarOpen(false);
-                    }} 
-                    disabled={loading} 
+                    }}
+                    disabled={loading}
                     className="w-full h-12 text-base"
                   >
                     {loading ? (
@@ -307,10 +306,10 @@ export default function ResumeAnalyzerPage() {
         <div className="flex flex-col">
           {/* Header */}
           <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-4 lg:px-6">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="lg:hidden h-9 w-9" 
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden h-9 w-9"
               onClick={() => setIsMobileSidebarOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -333,8 +332,8 @@ export default function ResumeAnalyzerPage() {
                     <span className="lg:hidden">Tap the menu button above to add your resume and get started.</span>
                     <span className="hidden lg:inline">Paste your resume in the sidebar to get started.</span>
                   </p>
-                  <Button 
-                    className="lg:hidden mt-4" 
+                  <Button
+                    className="lg:hidden mt-4"
                     onClick={() => setIsMobileSidebarOpen(true)}
                   >
                     <FileText className="mr-2 h-4 w-4" />
@@ -356,75 +355,75 @@ export default function ResumeAnalyzerPage() {
               <div className="grid gap-4 lg:gap-6">
                 <Card>
                   <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="space-y-1">
-                        <CardTitle className="text-lg lg:text-xl">Analysis Overview</CardTitle>
-                        <CardDescription className="text-sm">{analysis.scoreRationale}</CardDescription>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                        <Button 
-                          variant="secondary" 
-                          size="sm" 
-                          onClick={() => setIsLogOpen(true)} 
-                          disabled={!agentLog}
-                          className="w-full sm:w-auto text-xs lg:text-sm"
-                        >
-                          <Terminal className="mr-2 h-3 w-3 lg:h-4 lg:w-4"/>
-                          <span className="hidden sm:inline">Show Agent Log</span>
-                          <span className="sm:hidden">Agent Log</span>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={handleDownloadReport}
-                          className="w-full sm:w-auto text-xs lg:text-sm"
-                        >
-                          <Download className="mr-2 h-3 w-3 lg:h-4 lg:w-4"/>
-                          <span className="hidden sm:inline">Download Report</span>
-                          <span className="sm:hidden">Download</span>
-                        </Button>
-                      </div>
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg lg:text-xl">Analysis Overview</CardTitle>
+                      <CardDescription className="text-sm">{analysis.scoreRationale}</CardDescription>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setIsLogOpen(true)}
+                        disabled={!agentLog}
+                        className="w-full sm:w-auto text-xs lg:text-sm"
+                      >
+                        <Terminal className="mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                        <span className="hidden sm:inline">Show Agent Log</span>
+                        <span className="sm:hidden">Agent Log</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownloadReport}
+                        className="w-full sm:w-auto text-xs lg:text-sm"
+                      >
+                        <Download className="mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                        <span className="hidden sm:inline">Download Report</span>
+                        <span className="sm:hidden">Download</span>
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="flex items-center justify-center p-4 lg:p-6">
                     <div className={`text-4xl lg:text-6xl font-bold ${getScoreColor(analysis.score)}`}>{analysis.score}/100</div>
                   </CardContent>
                 </Card>
                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Strengths</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ul className="list-disc pl-5 space-y-2">
-                            {analysis.strengths.map((strength, i) => (
-                                <li key={i}>{strength}</li>
-                            ))}
-                        </ul>
-                    </CardContent>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Strengths</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="list-disc pl-5 space-y-2">
+                      {analysis.strengths.map((strength, i) => (
+                        <li key={i}>{strength}</li>
+                      ))}
+                    </ul>
+                  </CardContent>
                 </Card>
                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Lightbulb className="text-yellow-500" /> Actionable Improvements</CardTitle>
-                        <CardDescription>Expand each section to see why it matters and how to fix it.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Accordion type="single" collapsible className="w-full">
-                            {analysis.improvements.map((item, i) => (
-                                <AccordionItem value={`item-${i}`} key={i}>
-                                    <AccordionTrigger className="font-semibold">{item.suggestion}</AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="space-y-4">
-                                            <p className="text-muted-foreground"><strong className="text-foreground">Why it matters:</strong> {item.explanation}</p>
-                                            <div>
-                                                <p className="font-semibold">Example:</p>
-                                                <blockquote className="mt-2 border-l-2 pl-6 italic text-sm">
-                                                    {item.example}
-                                                </blockquote>
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                    </CardContent>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Lightbulb className="text-yellow-500" /> Actionable Improvements</CardTitle>
+                    <CardDescription>Expand each section to see why it matters and how to fix it.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Accordion type="single" collapsible className="w-full">
+                      {analysis.improvements.map((item, i) => (
+                        <AccordionItem value={`item-${i}`} key={i}>
+                          <AccordionTrigger className="font-semibold">{item.suggestion}</AccordionTrigger>
+                          <AccordionContent>
+                            <div className="space-y-4">
+                              <p className="text-muted-foreground"><strong className="text-foreground">Why it matters:</strong> {item.explanation}</p>
+                              <div>
+                                <p className="font-semibold">Example:</p>
+                                <blockquote className="mt-2 border-l-2 pl-6 italic text-sm">
+                                  {item.example}
+                                </blockquote>
+                              </div>
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </CardContent>
                 </Card>
               </div>
             )}
