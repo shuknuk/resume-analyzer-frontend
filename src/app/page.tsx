@@ -16,6 +16,8 @@ import {
   Building2,
   Lightbulb,
   Terminal,
+  Menu,
+  X,
 } from "lucide-react";
 import {
   Card,
@@ -30,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define the NEW structure of the analysis object
 type Improvement = {
@@ -53,6 +56,7 @@ export default function ResumeAnalyzerPage() {
   const [agentLog, setAgentLog] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isLogOpen, setIsLogOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Input validation function
   const validateInput = (text: string): boolean => {
@@ -151,7 +155,7 @@ export default function ResumeAnalyzerPage() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Help Dialog */}
       <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent className="sm:max-w-xl max-w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>How It Works</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-4 text-sm">
             <div className="space-y-2">
@@ -171,22 +175,99 @@ export default function ResumeAnalyzerPage() {
             <h4 className="font-semibold">Your Privacy & Data</h4>
             <p className="text-xs text-muted-foreground">Your resume text is sent to our backend to be processed by Google&apos;s Gemini model. If you provide a company name, the agent uses the Tavily Search API to browse the web. No data is saved on our servers.</p>
           </div>
-          <DialogFooter><DialogClose asChild><Button type="button">Got it!</Button></DialogClose></DialogFooter>
+          <DialogFooter><DialogClose asChild><Button type="button" className="w-full sm:w-auto">Got it!</Button></DialogClose></DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Agent Log Dialog */}
       <Dialog open={isLogOpen} onOpenChange={setIsLogOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader><DialogTitle>Agent Execution Log</DialogTitle><DialogDescription>See the AI&apos;s thought process, including the tools it used.</DialogDescription></DialogHeader>
-          <div className="mt-4 max-h-[60vh] overflow-y-auto rounded-md bg-muted p-4">
+          <div className="flex-1 overflow-y-auto rounded-md bg-muted p-4 min-h-0">
             <pre className="text-xs text-muted-foreground whitespace-pre-wrap">{agentLog || "No log available."}</pre>
           </div>
-          <DialogFooter><DialogClose asChild><Button type="button">Close</Button></DialogClose></DialogFooter>
+          <DialogFooter><DialogClose asChild><Button type="button" className="w-full sm:w-auto">Close</Button></DialogClose></DialogFooter>
         </DialogContent>
       </Dialog>
       
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileSidebarOpen(false)} />
+          <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-background border-r shadow-lg">
+            <div className="flex h-full flex-col">
+              <div className="flex h-14 items-center justify-between border-b px-4">
+                <Link href="/" className="flex items-center gap-2 font-semibold">
+                  <FileText className="h-5 w-5" />
+                  <span>Resume Analyzer</span>
+                </Link>
+                <Button variant="ghost" size="icon" onClick={() => setIsMobileSidebarOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-auto p-4">
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="mb-3 font-semibold">Your Resume</h3>
+                    <Textarea 
+                      value={resumeText} 
+                      onChange={(e) => setResumeText(e.target.value)} 
+                      placeholder="Paste your resume text here..." 
+                      className="h-40 text-sm resize-none" 
+                    />
+                  </div>
+                  <div>
+                    <h3 className="mb-3 font-semibold">Job Description (Optional)</h3>
+                    <Textarea 
+                      value={jobDescription} 
+                      onChange={(e) => setJobDescription(e.target.value)} 
+                      placeholder="Paste job description..." 
+                      className="h-32 text-sm resize-none" 
+                    />
+                  </div>
+                  <div>
+                    <h3 className="mb-3 font-semibold">Company Name (Optional)</h3>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        type="text" 
+                        placeholder="e.g. 'Netflix' or 'Stripe'" 
+                        value={companyName} 
+                        onChange={(e) => setCompanyName(e.target.value)} 
+                        className="pl-10 h-12" 
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => {
+                      handleAnalyze();
+                      setIsMobileSidebarOpen(false);
+                    }} 
+                    disabled={loading} 
+                    className="w-full h-12 text-base"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="mr-2 h-5 w-5" />
+                        Analyze Resume
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Layout */}
       <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
+        {/* Desktop Sidebar */}
         <div className="hidden border-r bg-muted/40 lg:block">
           <div className="flex h-full max-h-screen flex-col gap-2">
             <div className="flex h-[60px] items-center border-b px-6">
@@ -221,50 +302,90 @@ export default function ResumeAnalyzerPage() {
             </div>
           </div>
         </div>
+
+        {/* Main Content */}
         <div className="flex flex-col">
-          <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6">
-            <div className="flex-1"><h1 className="text-lg font-semibold">Analysis Dashboard</h1></div>
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setIsHelpOpen(true)}><HelpCircle className="h-4 w-4" /></Button>
+          {/* Header */}
+          <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-4 lg:px-6">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="lg:hidden h-9 w-9" 
+              onClick={() => setIsMobileSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold">Resume Analyzer</h1>
+            </div>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setIsHelpOpen(true)}>
+              <HelpCircle className="h-4 w-4" />
+            </Button>
             <ThemeToggle />
           </header>
           <main className="flex-1 p-4 md:p-6">
             {!analysis && !loading && (
-              <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[80vh]">
-                <div className="flex flex-col items-center gap-1 text-center">
+              <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm min-h-[60vh] lg:h-[80vh]">
+                <div className="flex flex-col items-center gap-4 text-center px-4">
                   <Sparkles className="h-12 w-12 text-muted-foreground" />
-                  <h3 className="text-2xl font-bold tracking-tight">Ready for your analysis?</h3>
-                  <p className="text-sm text-muted-foreground">Paste your resume in the sidebar to get started.</p>
+                  <h3 className="text-xl lg:text-2xl font-bold tracking-tight">Ready for your analysis?</h3>
+                  <p className="text-sm text-muted-foreground max-w-md">
+                    <span className="lg:hidden">Tap the menu button above to add your resume and get started.</span>
+                    <span className="hidden lg:inline">Paste your resume in the sidebar to get started.</span>
+                  </p>
+                  <Button 
+                    className="lg:hidden mt-4" 
+                    onClick={() => setIsMobileSidebarOpen(true)}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Add Resume
+                  </Button>
                 </div>
               </div>
             )}
             {loading && (
-              <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[80vh]">
-                <div className="flex flex-col items-center gap-2 text-center">
+              <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm min-h-[60vh] lg:h-[80vh]">
+                <div className="flex flex-col items-center gap-2 text-center px-4">
                   <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
-                  <h3 className="text-2xl font-bold tracking-tight">Generating Feedback</h3>
+                  <h3 className="text-xl lg:text-2xl font-bold tracking-tight">Generating Feedback</h3>
                   <p className="text-sm text-muted-foreground">This will take some time, AI tokens don&apos;t grow on trees!</p>
                 </div>
               </div>
             )}
             {analysis && (
-              <div className="grid gap-6">
+              <div className="grid gap-4 lg:gap-6">
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle>Analysis Overview</CardTitle>
-                        <CardDescription>{analysis.scoreRationale}</CardDescription>
+                  <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="space-y-1">
+                        <CardTitle className="text-lg lg:text-xl">Analysis Overview</CardTitle>
+                        <CardDescription className="text-sm">{analysis.scoreRationale}</CardDescription>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="secondary" size="sm" onClick={() => setIsLogOpen(true)} disabled={!agentLog}>
-                          <Terminal className="mr-2 h-4 w-4"/>Show Agent Log
+                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          onClick={() => setIsLogOpen(true)} 
+                          disabled={!agentLog}
+                          className="w-full sm:w-auto text-xs lg:text-sm"
+                        >
+                          <Terminal className="mr-2 h-3 w-3 lg:h-4 lg:w-4"/>
+                          <span className="hidden sm:inline">Show Agent Log</span>
+                          <span className="sm:hidden">Agent Log</span>
                         </Button>
-                        <Button variant="outline" size="sm" onClick={handleDownloadReport}>
-                          <Download className="mr-2 h-4 w-4"/>Download Report
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={handleDownloadReport}
+                          className="w-full sm:w-auto text-xs lg:text-sm"
+                        >
+                          <Download className="mr-2 h-3 w-3 lg:h-4 lg:w-4"/>
+                          <span className="hidden sm:inline">Download Report</span>
+                          <span className="sm:hidden">Download</span>
                         </Button>
                       </div>
                   </CardHeader>
-                  <CardContent className="flex items-center justify-center p-6">
-                    <div className={`text-6xl font-bold ${getScoreColor(analysis.score)}`}>{analysis.score}/100</div>
+                  <CardContent className="flex items-center justify-center p-4 lg:p-6">
+                    <div className={`text-4xl lg:text-6xl font-bold ${getScoreColor(analysis.score)}`}>{analysis.score}/100</div>
                   </CardContent>
                 </Card>
                 <Card>
