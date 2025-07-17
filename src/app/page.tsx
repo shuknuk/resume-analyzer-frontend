@@ -13,9 +13,9 @@ import {
   Sparkles,
   HelpCircle,
   Download,
-  Trash2,
   Building2,
   Lightbulb,
+  Terminal, // New Icon for the log
 } from "lucide-react";
 import {
   Card,
@@ -44,47 +44,39 @@ type Analysis = {
   improvements: Improvement[];
 };
 
-// This is a separate type for the history to include the timestamp
-type HistoryEntry = Analysis & {
-    timestamp: string;
-};
-
-
 export default function ResumeAnalyzerPage() {
   const [resumeText, setResumeText] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
-  const [analysisHistory, setAnalysisHistory] = useState<HistoryEntry[]>([]);
+  const [agentLog, setAgentLog] = useState<string | null>(null); // State for the agent log
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLogOpen, setIsLogOpen] = useState(false); // State for the log dialog
 
-  useEffect(() => {
-    const storedHistory = localStorage.getItem('analysisHistory');
-    if (storedHistory) {
-      setAnalysisHistory(JSON.parse(storedHistory));
+  // Input validation function
+  const validateInput = (text: string): boolean => {
+    if (text.length < 250) {
+      toast.error("Resume text is too short. Please paste your full resume for an accurate analysis.");
+      return false;
     }
-    const hasVisited = localStorage.getItem('hasVisited');
-    if (!hasVisited) {
-      setIsHelpOpen(true);
-      localStorage.setItem('hasVisited', 'true');
+    const keywords = ["experience", "education", "skills", "project", "summary", "objective"];
+    const textLower = text.toLowerCase();
+    const foundKeywords = keywords.filter(kw => textLower.includes(kw));
+    if (foundKeywords.length < 2) {
+      toast.error("Input does not appear to be a resume. Please check your text and include sections like 'Experience' or 'Skills'.");
+      return false;
     }
-    let storedSessionId = localStorage.getItem('sessionId');
-    if (!storedSessionId) {
-      storedSessionId = uuidv4();
-      localStorage.setItem('sessionId', storedSessionId);
-    }
-    setSessionId(storedSessionId);
-  }, []);
+    return true;
+  };
 
   const handleAnalyze = async () => {
-    if (!resumeText.trim()) {
-      toast.error("Please paste your resume text first.");
+    if (!validateInput(resumeText)) {
       return;
     }
     setLoading(true);
     setAnalysis(null);
+    setAgentLog(null);
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -92,7 +84,6 @@ export default function ResumeAnalyzerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          session_id: sessionId,
           resume_text: resumeText,
           job_description: jobDescription,
           company_name: companyName,
@@ -102,13 +93,7 @@ export default function ResumeAnalyzerPage() {
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
       setAnalysis(data.analysis);
-
-      // Save to history with a timestamp
-      const newHistoryEntry: HistoryEntry = { ...data.analysis, timestamp: new Date().toISOString() };
-      const updatedHistory = [newHistoryEntry, ...analysisHistory];
-      setAnalysisHistory(updatedHistory);
-      localStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
-      
+      setAgentLog(data.log); // Save the agent log
       toast.success("Analysis complete!");
 
     } catch (e) {
@@ -120,47 +105,54 @@ export default function ResumeAnalyzerPage() {
     }
   };
 
+  const handleDownloadReport = () => {
+    if (!analysis) return;
+    let report = `========================================\n`;
+    report += ` AI RESUME ANALYSIS REPORT\n`;
+    report += `========================================\n\n`;
+    report += `Date: ${new Date().toLocaleDateString()}\n\n`;
+    report += `----------------------------------------\n`;
+    report += ` OVERVIEW\n`;
+    report += `----------------------------------------\n`;
+    report += `SCORE: ${analysis.score}/100\n`;
+    report += `RATIONALE: ${analysis.scoreRationale}\n\n`;
+    report += `----------------------------------------\n`;
+    report += ` STRENGTHS\n`;
+    report += `----------------------------------------\n`;
+    analysis.strengths.forEach(strength => { report += `- ${strength}\n`; });
+    report += `\n`;
+    report += `----------------------------------------\n`;
+    report += ` ACTIONABLE IMPROVEMENTS\n`;
+    report += `----------------------------------------\n`;
+    analysis.improvements.forEach(item => {
+      report += `\nSuggestion: ${item.suggestion}\n`;
+      report += `Why it matters: ${item.explanation}\n`;
+      report += `Example: ${item.example}\n---`;
+    });
+    const dataBlob = new Blob([report], { type: "text/plain" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `AI-Resume-Report.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.info("Your report has been downloaded.");
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 85) return "text-green-400";
     if (score >= 70) return "text-yellow-400";
     return "text-red-400";
   };
   
-  const handleDownloadData = () => {
-    const dataStr = JSON.stringify({sessionId, history: analysisHistory}, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `resume-analysis-session-${sessionId}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast.info("Your session data has been downloaded.");
-  };
-
-  const handleClearData = () => {
-    localStorage.removeItem('analysisHistory');
-    localStorage.removeItem('sessionId');
-    setAnalysisHistory([]);
-    setAnalysis(null);
-    const newSessionId = uuidv4();
-    localStorage.setItem('sessionId', newSessionId);
-    setSessionId(newSessionId);
-    toast.warn("Your session data has been cleared.");
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Help Dialog */}
       <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
         <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>How It Works</DialogTitle>
-            <DialogDescription>
-              Welcome! This is a quick guide to using the AI Resume Analyzer.
-            </DialogDescription>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>How It Works</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-4 text-sm">
             <div className="space-y-2">
                 <h4 className="font-semibold">1. Paste Your Resume</h4>
@@ -168,26 +160,29 @@ export default function ResumeAnalyzerPage() {
             </div>
             <div className="space-y-2">
                 <h4 className="font-semibold">2. Add Context (Optional, but Recommended)</h4>
-                <p className="text-muted-foreground">
-                    - <strong>Job Description:</strong> Paste the description of the job you&apos;re targeting. The AI will analyze your resume against these specific requirements.
-                </p>
-                <p className="text-muted-foreground">
-                    - <strong>Company Name:</strong> Provide a company name. The AI agent will research the company&apos;s values and culture to give you an extra edge.
-                </p>
+                <p className="text-muted-foreground">- <strong>Job Description:</strong> Paste the description of the job you&apos;re targeting. The AI will analyze your resume against these specific requirements.</p>
+                <p className="text-muted-foreground">- <strong>Company Name:</strong> Provide a company name. The AI agent will research the company&apos;s values and culture to give you an extra edge.</p>
             </div>
              <div className="space-y-2">
                 <h4 className="font-semibold">3. Get Analysis</h4>
                 <p className="text-muted-foreground">Click the &quot;Analyze Resume&quot; button to receive your detailed, AI-powered breakdown.</p>
             </div>
             <hr className="my-2" />
-            <h4 className="font-semibold">Your Privacy</h4>
-            <p className="text-xs text-muted-foreground">
-              Your data is saved only in your browser local storage. It is never sent to our servers. You are in full control.
-            </p>
+            <h4 className="font-semibold">Your Privacy & Data</h4>
+            <p className="text-xs text-muted-foreground">Your resume text is sent to our backend to be processed by Google&apos;s Gemini model. If you provide a company name, the agent uses the Tavily Search API to browse the web. No data is saved on our servers.</p>
           </div>
-          <DialogFooter>
-            <DialogClose asChild><Button type="button">Got it!</Button></DialogClose>
-          </DialogFooter>
+          <DialogFooter><DialogClose asChild><Button type="button">Got it!</Button></DialogClose></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agent Log Dialog */}
+      <Dialog open={isLogOpen} onOpenChange={setIsLogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader><DialogTitle>Agent Execution Log</DialogTitle><DialogDescription>See the AI&apos;s thought process, including the tools it used.</DialogDescription></DialogHeader>
+          <div className="mt-4 max-h-[60vh] overflow-y-auto rounded-md bg-muted p-4">
+            <pre className="text-xs text-muted-foreground whitespace-pre-wrap">{agentLog || "No log available."}</pre>
+          </div>
+          <DialogFooter><DialogClose asChild><Button type="button">Close</Button></DialogClose></DialogFooter>
         </DialogContent>
       </Dialog>
       
@@ -222,13 +217,6 @@ export default function ResumeAnalyzerPage() {
                 <Button onClick={handleAnalyze} disabled={loading} className="m-2">
                   {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>) : (<><Zap className="mr-2 h-4 w-4" />Analyze Resume</>)}
                 </Button>
-                <Card className="m-2 mt-4 bg-transparent border-dashed">
-                  <CardHeader className="p-4"><CardTitle className="text-sm">Data Management</CardTitle></CardHeader>
-                  <CardContent className="p-4 pt-0 grid gap-2">
-                    <Button variant="outline" size="sm" onClick={handleDownloadData} disabled={analysisHistory.length === 0}><Download className="mr-2 h-4 w-4" />Download History</Button>
-                    <Button variant="destructive" size="sm" onClick={handleClearData} disabled={analysisHistory.length === 0}><Trash2 className="mr-2 h-4 w-4" />Clear History</Button>
-                  </CardContent>
-                </Card>
               </nav>
             </div>
           </div>
@@ -254,21 +242,29 @@ export default function ResumeAnalyzerPage() {
                 <div className="flex flex-col items-center gap-2 text-center">
                   <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
                   <h3 className="text-2xl font-bold tracking-tight">Generating Feedback</h3>
-                  <p className="text-sm text-muted-foreground">Our AI is working its magic... this may take a moment.</p>
+                  <p className="text-sm text-muted-foreground">This will take some time, AI tokens don&apos;t grow on trees!</p>
                 </div>
               </div>
             )}
             {analysis && (
               <div className="grid gap-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Analysis Overview</CardTitle>
-                    <CardDescription>{analysis.scoreRationale}</CardDescription>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle>Analysis Overview</CardTitle>
+                        <CardDescription>{analysis.scoreRationale}</CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="secondary" size="sm" onClick={() => setIsLogOpen(true)} disabled={!agentLog}>
+                          <Terminal className="mr-2 h-4 w-4"/>Show Agent Log
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleDownloadReport}>
+                          <Download className="mr-2 h-4 w-4"/>Download Report
+                        </Button>
+                      </div>
                   </CardHeader>
                   <CardContent className="flex items-center justify-center p-6">
-                    <div className={`text-6xl font-bold ${getScoreColor(analysis.score)}`}>
-                      {analysis.score}/100
-                    </div>
+                    <div className={`text-6xl font-bold ${getScoreColor(analysis.score)}`}>{analysis.score}/100</div>
                   </CardContent>
                 </Card>
                 <Card>
