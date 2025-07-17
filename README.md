@@ -57,6 +57,7 @@ The AI agent's core logic, built with Python and LangChain, is located in the ba
 
 [**➡️ View Backend Repo**](https://github.com/shuknuk/resume-analyzer)
 
+> ### View Case Study
 >
 > You can read a full case study detailing the architecture, challenges, and key learnings from this project on my personal portfolio.
 >
