@@ -7,7 +7,6 @@ import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
 import {
   CheckCircle,
-  AlertTriangle,
   Zap,
   Loader2,
   FileText,
@@ -28,7 +27,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
