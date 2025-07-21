@@ -1,7 +1,7 @@
 // src/app/page.tsx
 'use client';
 
-import { useState } from "react"; // Removed useEffect
+import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 // Removed uuidv4 import
@@ -56,6 +56,11 @@ export default function ResumeAnalyzerPage() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isLogOpen, setIsLogOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Show help dialog automatically when the page loads
+  useEffect(() => {
+    setIsHelpOpen(true);
+  }, []);
 
   // Input validation function
   const validateInput = (text: string): boolean => {
