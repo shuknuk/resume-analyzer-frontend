@@ -1,5 +1,6 @@
 # ✨ Intelligent Resume Analyzer - Frontend
 
+
 This repository contains the frontend for the Intelligent Resume Analyzer, a full-stack AI agent that provides hyper-personalized feedback on resumes. This application is built with Next.js and provides a clean, responsive, and intuitive user interface for interacting with the AI agent.
 
 [**➡️ View the Live Application**](https://ranalyzer.vercel.app/)
